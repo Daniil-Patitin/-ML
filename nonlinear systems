@@ -1,0 +1,96 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import math
+
+A = np.array([1,0,1,0,1,1,1,1,6],float)
+A = A.reshape(3,-1)
+B = np.array([2,5,9],float)
+D = np.diag(np.diag(A))
+W=1.5
+X = np.array([0,0,0],float)
+X_i = np.array([0,0,0],float)
+
+def func_1(A,X_i,i):
+  sum_= 0
+  for j in range(i):
+    sum_ = sum_ + A[i,j] * X_i[j]
+  return sum_
+
+def func_2(A,X,i):
+  sum_ = 0
+  for j in range(i+1,len(X)):
+    sum_ = sum_ + A[i,j] * X[j]
+  return sum_
+
+norma = 1
+norma1 =1
+while norma> 1e-8:
+  for i in range(len(X)):
+    if i == 0:
+      X_i[i] = ((D[i,i] * X[i]) * (1-W) + W * B[i] - W * func_2(A,X,i))/D[i,i]
+    if i == len(X)-1:
+      X_i[i] = ( (D[i,i] * X[i]) * (1-W) + W * B[i] - W * func_1(A,X_i,i) ) / D[i,i]
+    if (i!=0) and (i!=len(X)-1):
+      X_i[i] = ((D[i,i] * X[i]) * (1-W) + W * B[i] - W * func_2(A,X,i) - W * func_1(A,X_i,i)) / D[i,i]
+  sum_1=0
+  for i in range(len(X)):
+    sum_1 = sum_1 + (X[i]-X_i[i])**2
+    X[i] = X_i[i]
+  norma = sum_1**0.5
+  sum_1=0
+  norma1 =norma1+1
+
+print('Полученный вектор:', X, 'количество итераций:',norma1, 'норма разности:', norma)
+c = np.linalg.solve(A,B)
+print('точное решение:',c)
+summa = 0
+for i in range(len(A)):
+  summa = summa + abs(X[i] - c[i])
+print('погрешность', summa)
+
+
+
+#НЕЛИНЕЙНЫЕ СИСТЕМЫ УРАВНЕНИЙ 
+
+t1,t2 = 1.18e-1,1.18e-1
+
+#НАЧАЛЬНОЕ ПРИБЛИЖЕНИЕ 
+x = 1.55
+y = 4.02
+x_1,y_1 = 0,0
+def funcion_1(x,y):
+  return x**4 - (y + 1)
+def funcion_2(x,y):
+  return x - math.tan(y)
+
+def derivative_funcion_1(x):
+  if 4*x**3 > 0:
+    return 1
+  else:
+    return -1
+def derivative_funcion_2(y):
+  if (-1)/((math.cos(y))**2) > 0:
+    return 1
+  else:
+    return -1
+
+counter = 0
+moduly = 1
+epsilon = 1e-14
+while moduly > epsilon:
+  counter = counter + 1
+  x_1 = x - t1 * funcion_1(x,y) * derivative_funcion_1(x)
+  y_1 = y - t2 * funcion_2(x,y) * derivative_funcion_2(y)
+  moduly = ((x_1 - x)**2 + (y_1 - y)**2)**0.5
+  x = x_1
+  y = y_1
+print('ПАРА КОРНЕЙ РЕШЕНИЯ НЕЛИНЕЙНОЙ СИСТЕМЫ УРАВНЕНИЙ:',x,y)
+print('КОЛИЧЕСТВО ИТЕРАЦИЙ:',counter)
+
+#ТОЧНОЕ РЕШЕНИЕ:
+x5 = 1.504668511779133
+y5 = 4.125819752524801
+#СРАВНЕНИЕ С ТОЧНЫМ РЕШЕНИЕМ ПО НОРМЕ 2:
+print('СРАВНЕНИЕ С ТОЧНЫМ ОТВЕТОМ:',((x-x5)**2 +(y-y5)**2)**0.5)
